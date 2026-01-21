@@ -119,6 +119,7 @@ if __name__ == '__main__':
     if not os.path.exists(LEADS_FILE): save_data(LEADS_FILE, [])
     if not os.path.exists(PROJECTS_FILE): save_data(PROJECTS_FILE, [])
     
-    # Roda o servidor
+    # IMPORTANTE: O Render usa a variável de ambiente PORT
+    port = int(os.environ.get("PORT", 5000))
     print("Sistema Bravelle Iniciado! Acesse http://127.0.0.1:5000 no navegador.")
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=port)
