@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bravelle - Dashboard Premium Online</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React Core -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #f4f4f5; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #bc9951; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-in { animation: fadeIn 0.5s ease-out; }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+    {% raw %}
+        // --- CONFIGURAÇÃO ---
+        const API_URL = ""; 
+        
+        const { useState, useEffect, useMemo } = React;
+        const BRAVELLE_LOGO_URL = "https://i.imgur.com/pL8MoNj.png";
+
+        // --- ÍCONES ---
+        const Icons = {
+            LayoutDashboard: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>,
+            Users: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            Target: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+            Trello: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><rect width="3" height="9" x="7" y="7"/><rect width="3" height="5" x="14" y="7"/></svg>,
+            TrendingUp: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
+            Plus: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
+            Gauge: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>,
+            BarChart3: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>,
+            Clock: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            CheckCircle2: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>,
+            AlertCircle: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>,
+            X: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+            Briefcase: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>,
+            User: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            ArrowRight: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>,
+            Trash2: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>,
+            AlertTriangle: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>,
+            History: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>,
+            Zap: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Calendar: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>,
+            ArrowUpCircle: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>,
+            BookOpen: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            Globe: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+            ChevronRight: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+            ShieldCheck: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
+            ZapOff: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="12.41 6.75 13 2 10.57 4.92"/><polyline points="18.57 12.91 21 10 15.66 10"/><polyline points="8 8 3 14 12 14 11 22 16 16"/><line x1="1" x2="23" y1="1" y2="23"/></svg>,
+            Lightbulb: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="9" x2="15" y1="18" y2="18"/><line x1="10" x2="14" y1="22" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 12 2a4.65 4.65 0 0 0-4.5 9.5c.76.76 1.23 1.52 1.41 2.5"/></svg>,
+            Smartphone: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>,
+            MapPin: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
+            Instagram: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>,
+            Lock: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            Default: (p) => <svg {...p} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+        };
+
+        const SimpleAreaChart = ({ data, color = "#bc9951" }) => {
+            if (!data || data.length === 0) return <div className="flex items-center justify-center h-full text-zinc-600 text-xs italic">Sem dados</div>;
+            const height = 150, width = 600, padding = 20;
+            const maxVal = Math.max(...data.map(d => d.v)) || 10;
+            const points = data.map((d, i) => {
+                const x = (i / (Math.max(data.length - 1, 1))) * (width - padding * 2) + padding;
+                const y = height - ((d.v / maxVal) * (height - padding * 2)) - padding;
+                return { x, y, ...d };
+            });
+            const linePath = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`;
+            const areaPath = points.length > 1 ? `${linePath} L ${points[points.length-1].x},${height} L ${points[0].x},${height} Z` : `M ${padding},${height} L ${width-padding},${height} Z`;
+            return (
+                <div className="w-full h-full flex flex-col items-center justify-center">
+                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+                        <defs>
+                            <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+                                <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                                <stop offset="100%" stopColor={color} stopOpacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <line x1={padding} y1={height-padding} x2={width-padding} y2={height-padding} stroke="#27272a" strokeWidth="1" />
+                        <path d={areaPath} fill="url(#chartGradient)" />
+                        <path d={linePath} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        {points.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="3" fill="#09090b" stroke={color} strokeWidth="2" />)}
+                    </svg>
+                    <div className="flex justify-between w-full px-2 text-[9px] text-zinc-500 mt-2 font-mono uppercase">
+                        {data.map((d, i) => <span key={i}>{d.name}</span>)}
+                    </div>
+                </div>
+            );
+        };
+
+        const SEGMENTOS_AUTOMOTIVOS = ["Concessionárias", "Estética automotiva", "Lava jato", "Autopeça", "Mecânica", "Lanternagem", "Capotaria", "Borracharia", "Guincho", "Loja de som automotivo", "Revendedor"];
+        const SALES_STAGES = [{ id: 'novo', label: 'Novo Lead', color: 'bg-blue-500' }, { id: 'qualificado', label: 'Qualificado', color: 'bg-indigo-500' }, { id: 'diagnostico', label: 'Diagnóstico', color: 'bg-purple-500' }, { id: 'reuniao', label: 'Reunião Feita', color: 'bg-amber-500' }, { id: 'proposta', label: 'Proposta Enviada', color: 'bg-orange-500' }, { id: 'negociacao', label: 'Negociação', color: 'bg-[#bc9951]' }, { id: 'fechado', label: 'Fechado', color: 'bg-emerald-500' }, { id: 'perdido', label: 'Perdido', color: 'bg-red-500' }];
+
+        const parseCurrency = (val) => { if (!val) return 0; if (typeof val === 'number') return val; return parseFloat(val.replace(/[R$\.\s]/g, '').replace(',', '.')) || 0; };
+        const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+        const Card = ({ children, className = "" }) => <div className={`bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg ${className}`}>{children}</div>;
+        const MetricCard = ({ title, value, change, icon: Icon, trend }) => (
+            <Card className="p-5">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="p-2 bg-zinc-800/50 rounded-lg text-[#bc9951]"><Icon size={20} /></div>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${trend === 'up' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-[#bc9951]/10 text-[#bc9951]'}`}>{change}</span>
+                </div>
+                <h3 className="text-zinc-400 text-sm font-medium">{title}</h3>
+                <p className="text-2xl font-bold text-white mt-1">{value}</p>
+            </Card>
+        );
+        const SidebarItem = ({ icon: Icon, label, active, onClick, bottom }) => (
+            <button onClick={onClick} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${active ? 'bg-[#bc9951] text-zinc-950 shadow-lg shadow-[#bc9951]/20' : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'} ${bottom ? 'mt-auto border-t border-zinc-900 pt-6 rounded-none' : ''}`}>
+                <Icon size={20} />
+                <span className="font-bold text-sm">{label}</span>
+            </button>
+        );
+        
+        const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-lg" }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className={`bg-zinc-900 border border-zinc-800 rounded-2xl w-full ${maxWidth} shadow-2xl animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]`}>
+                        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+                            <h2 className="text-xl font-bold text-white">{title}</h2>
+                            <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors"><Icons.X size={24} /></button>
+                        </div>
+                        <div className="p-6 overflow-y-auto custom-scrollbar">{children}</div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('overview');
+            const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
+            const [user, setUser] = useState({ uid: 'admin-local', name: 'Admin Local' }); // Usuário simulado
+            
+            const [leads, setLeads] = useState([]);
+            const [projects, setProjects] = useState([]);
+            const [notification, setNotification] = useState(null);
+
+            // FUNÇÃO PARA BUSCAR DADOS DO BACKEND PYTHON
+            const fetchData = async () => {
+                try {
+                    const resLeads = await fetch(`${API_URL}/api/leads`);
+                    const dataLeads = await resLeads.json();
+                    setLeads(dataLeads);
+
+                    const resProjects = await fetch(`${API_URL}/api/projects`);
+                    const dataProjects = await resProjects.json();
+                    setProjects(dataProjects);
+                } catch (error) {
+                    console.error("Erro ao buscar dados do Python:", error);
+                }
+            };
+
+            // Carrega dados ao iniciar e atualiza a cada 5 segundos (Polling)
+            useEffect(() => {
+                fetchData();
+                const interval = setInterval(fetchData, 5000);
+                return () => clearInterval(interval);
+            }, []);
+
+            const showNotification = (msg) => { setNotification(msg); setTimeout(() => setNotification(null), 4000); };
+
+            const handleAddLead = async (e, newLeadData) => {
+                const val = parseFloat(newLeadData.value.replace(',', '.')) || 0;
+                
+                const leadData = { 
+                    id: Date.now().toString(),
+                    name: newLeadData.name, 
+                    segment: newLeadData.segment, 
+                    origin: newLeadData.origin, 
+                    responsible: newLeadData.responsible || 'Admin', 
+                    instagram: newLeadData.instagram ? `@${newLeadData.instagram.replace('@', '')}` : '', 
+                    phone: newLeadData.phone || '', 
+                    address: newLeadData.address || '',
+                    region: newLeadData.region || '',
+                    status: 'Novo Lead', 
+                    funnelStage: 'novo', 
+                    value: formatCurrency(val), 
+                    city: 'Cadastrado Manual', 
+                    activities: [], 
+                    commercialNotes: '', 
+                    lastActionDate: new Date().toISOString(), 
+                    createdAt: new Date().toISOString(),
+                    crmStatus: 'Ativo', 
+                    upsells: [], 
+                    checkpoints: [],
+                    lastEditor: '' 
+                };
+                
+                try {
+                    await fetch(`${API_URL}/api/leads`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(leadData)
+                    });
+                    fetchData(); // Atualiza na hora
+                    setIsAddLeadOpen(false);
+                    showNotification("Lead salvo no Python Backend!");
+                } catch (err) {
+                    console.error(err);
+                    showNotification("Erro ao salvar.");
+                }
+            };
+
+            const updateLead = async (id, data) => { 
+                try {
+                    await fetch(`${API_URL}/api/leads/${id}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                    
+                    // Lógica de Gatilho para Projeto
+                    const currentLead = leads.find(l => l.id === id);
+                    if (currentLead && data.funnelStage === 'fechado' && currentLead.funnelStage !== 'fechado') {
+                         createProjectFromLead({ ...currentLead, ...data });
+                    }
+                    fetchData();
+                } catch (err) {
+                    console.error("Error updating:", err);
+                }
+            };
+
+            const createProjectFromLead = async (lead) => {
+                if (projects.some(p => p.id === lead.id)) return;
+                
+                const newProject = { 
+                    id: lead.id,
+                    companyName: lead.name, 
+                    segment: lead.segment, 
+                    instagram: lead.instagram, 
+                    column: 'brainstorm', 
+                    responsible: lead.responsible, 
+                    notes: lead.commercialNotes || '', 
+                    services: [], 
+                    meeting: { date: '', time: '', type: 'briefing', observations: '' }, 
+                    meetings: [], 
+                    proposal: { services: '', value: lead.value, deadline: '', status: 'aprovada', link: '' }, 
+                    history: [{ date: new Date().toLocaleDateString(), action: 'Lead Fechado -> Iniciada Produção' }],
+                    lastEditor: lead.lastEditor || ''
+                };
+
+                try {
+                    await fetch(`${API_URL}/api/projects`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(newProject)
+                    });
+                    fetchData();
+                    showNotification(`Lead ${lead.name} enviado para Produção!`);
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+
+            const updateProject = async (id, data) => { 
+                await fetch(`${API_URL}/api/projects/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                fetchData();
+            };
+            
+            const deleteProject = async (id) => {
+                await fetch(`${API_URL}/api/projects/${id}`, { method: 'DELETE' });
+                fetchData();
+            };
+
+            const renderContent = () => {
+                switch (activeTab) {
+                    case 'overview': return <OverviewView leads={leads} />;
+                    case 'commercial': return <VendasFunisView leads={leads} updateLead={updateLead} />;
+                    case 'production': return <ProductionView projects={projects} updateProject={updateProject} onDeleteProject={deleteProject} leads={leads} updateLead={updateLead} />;
+                    case 'crm': return <ClientesCRMView leads={leads} updateLead={updateLead} projects={projects} updateProject={updateProject} />;
+                    case 'reports': return <ReportsView leads={leads} projects={projects} />;
+                    case 'tutorial': return <TutorialView />;
+                    default: return <OverviewView leads={leads} />;
+                }
+            };
+
+            return (
+                <div className="flex h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-[#bc9951]/30 overflow-hidden">
+                    <aside className="w-64 border-r border-zinc-800 flex flex-col bg-zinc-950 shrink-0">
+                        <div className="p-6 flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-[#bc9951] rounded-xl flex items-center justify-center shadow-lg shadow-[#bc9951]/20 overflow-hidden p-1.5">
+                                <img src={BRAVELLE_LOGO_URL} alt="Logo" className="w-full h-full object-contain filter brightness-0" />
+                            </div>
+                            <div>
+                                <h1 className="font-bold text-lg leading-tight uppercase italic text-white">Bravelle</h1>
+                                <p className="text-[10px] text-[#bc9951] font-bold tracking-widest uppercase">Python Backend</p>
+                            </div>
+                        </div>
+                        <nav className="flex-1 px-4 space-y-2 flex flex-col">
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest px-4 mb-2">Visão Geral</p>
+                            <SidebarItem icon={Icons.LayoutDashboard} label="Dashboard" active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
+                            
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest px-4 mt-8 mb-2">Operacional</p>
+                            <SidebarItem icon={Icons.Target} label="1. Vendas & Funis" active={activeTab === 'commercial'} onClick={() => setActiveTab('commercial')} />
+                            <SidebarItem icon={Icons.Trello} label="2. Produção" active={activeTab === 'production'} onClick={() => setActiveTab('production')} />
+                            <SidebarItem icon={Icons.Users} label="3. Clientes CRM" active={activeTab === 'crm'} onClick={() => setActiveTab('crm')} />
+                            
+                            <SidebarItem icon={Icons.BookOpen} label="Tutorial do Sistema" active={activeTab === 'tutorial'} onClick={() => setActiveTab('tutorial')} bottom />
+                            <SidebarItem icon={Icons.ShieldCheck} label="Relatórios & Logs" active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} />
+                        </nav>
+                    </aside>
+                    <main className="flex-1 flex flex-col overflow-hidden">
+                        <header className="h-20 border-b border-zinc-800 flex items-center justify-between px-8 bg-zinc-950/50 backdrop-blur-md shrink-0">
+                            <div className="flex flex-col">
+                                <h2 className="text-xl font-bold tracking-tight">
+                                    {activeTab === 'overview' && 'Dashboard Bravelle'}
+                                    {activeTab === 'reports' && 'Relatórios Administrativos'}
+                                    {activeTab === 'commercial' && 'Funil de Vendas Strategic'}
+                                    {activeTab === 'production' && 'Gestão de Produção'}
+                                    {activeTab === 'crm' && 'Relacionamento & Pós-Venda'}
+                                    {activeTab === 'tutorial' && 'Central de Treinamento'}
+                                </h2>
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full bg-emerald-500 animate-pulse`}></div>
+                                    <span className="text-[9px] font-bold text-zinc-500 uppercase">SERVER ONLINE</span>
+                                </div>
+                            </div>
+                            {activeTab !== 'tutorial' && activeTab !== 'reports' && (
+                                <button onClick={() => setIsAddLeadOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-[#bc9951] hover:bg-[#a68644] text-zinc-950 text-sm font-bold rounded-lg transition-all shadow-lg shadow-[#bc9951]/10">
+                                    <Icons.Plus size={18} /> Novo Lead Comercial
+                                </button>
+                            )}
+                        </header>
+                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                            {renderContent()}
+                        </div>
+                    </main>
+                    <AddLeadModal isOpen={isAddLeadOpen} onClose={() => setIsAddLeadOpen(false)} onSave={handleAddLead} />
+                    {notification && (
+                        <div className="fixed top-6 right-6 z-[100] bg-[#bc9951] text-zinc-950 px-6 py-4 rounded-xl shadow-2xl font-bold flex items-center gap-3 animate-in fade-in slide-in-from-right-4">
+                            <Icons.CheckCircle2 size={20} /> {notification}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- SUBVIEWS ---
+        function OverviewView({ leads }) {
+            const activeLeads = leads.filter(l => l.funnelStage !== 'perdido').length;
+            const closed = leads.filter(l => l.funnelStage === 'fechado' && l.crmStatus !== 'Cancelado').length;
+            const totalValue = leads.filter(l => l.funnelStage === 'fechado' && l.crmStatus !== 'Cancelado').reduce((acc, curr) => acc + parseCurrency(curr.value), 0);
+            const conversionRate = leads.length > 0 ? ((closed / leads.length) * 100).toFixed(1) : 0;
+            return (
+                <div className="space-y-8 animate-in fade-in duration-500">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <MetricCard title="Leads no Funil" value={activeLeads} change="Base Ativa" trend="up" icon={Icons.Target} />
+                        <MetricCard title="Taxa de Conversão" value={`${conversionRate}%`} change="Real" trend="up" icon={Icons.TrendingUp} />
+                        <MetricCard title="Contratos Vigentes" value={closed} change="Líquido" trend="up" icon={Icons.Users} />
+                        <MetricCard title="MRR Consolidado" value={formatCurrency(totalValue)} change="Líquido" trend="up" icon={Icons.Gauge} />
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <Card className="p-6">
+                           <h3 className="font-bold text-lg mb-8 flex items-center gap-2"><Icons.BarChart3 size={20} className="text-[#bc9951]" /> Evolução de Receita</h3>
+                           <div className="h-[250px]">
+                             <SimpleAreaChart data={[{name: 'Set', v: 2400}, {name: 'Out', v: 1398}, {name: 'Nov', v: 9800}, {name: 'Dez', v: 3908}, {name: 'Jan', v: totalValue || 4500}]} />
+                           </div>
+                        </Card>
+                        <Card className="p-6">
+                          <h3 className="font-bold text-lg mb-8 flex items-center gap-2"><Icons.Briefcase size={20} className="text-[#bc9951]" /> Clientes por Segmento</h3>
+                          <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                            {SEGMENTOS_AUTOMOTIVOS.map(seg => {
+                              const count = leads.filter(l => l.segment === seg && l.funnelStage === 'fechado' && l.crmStatus !== 'Cancelado').length;
+                              const percent = closed > 0 ? (count / closed) * 100 : 0;
+                              if (count === 0) return null;
+                              return (
+                                <div key={seg} className="flex items-center gap-4">
+                                   <span className="w-32 text-[10px] font-bold text-zinc-400 uppercase truncate">{seg}</span>
+                                   <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-[#bc9951]" style={{ width: `${percent}%` }}></div></div>
+                                   <span className="text-[10px] font-bold text-zinc-600 w-10 text-right">{Math.round(percent)}%</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </Card>
+                    </div>
+                </div>
+            );
+        }
+
+        function ReportsView({ leads, projects }) {
+            const [isUnlocked, setIsUnlocked] = useState(false);
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState(false);
+
+            const handleUnlock = (e) => {
+                e.preventDefault();
+                if (password === 'paunocu66') {
+                    setIsUnlocked(true);
+                    setError(false);
+                } else {
+                    setError(true);
+                    setTimeout(() => setError(false), 500);
+                }
+            };
+
+            const reportData = useMemo(() => {
+                if (!isUnlocked) return [];
+                const data = [];
+                leads.forEach(lead => {
+                    const responsavel = lead.lastEditor || lead.responsible || 'Admin';
+                    data.push({
+                        date: new Date(lead.createdAt || lead.lastActionDate),
+                        type: 'Novo Lead',
+                        desc: `Lead ${lead.name} criado no sistema.`,
+                        client: lead.name,
+                        user: responsavel,
+                        category: 'Comercial'
+                    });
+                    lead.activities?.forEach(act => {
+                        data.push({
+                            date: new Date(act.id),
+                            type: `Atividade: ${act.type}`,
+                            desc: act.note,
+                            client: lead.name,
+                            user: responsavel,
+                            category: 'Comercial'
+                        });
+                    });
+                    lead.checkpoints?.forEach(cp => {
+                         data.push({
+                            date: new Date(cp.id),
+                            type: `Checkpoint: ${cp.reason}`,
+                            desc: cp.notes,
+                            client: lead.name,
+                            user: responsavel,
+                            category: 'CRM'
+                        });
+                    });
+                    lead.upsells?.forEach(up => {
+                        data.push({
+                            date: new Date(up.id),
+                            type: `Upsell: ${up.service}`,
+                            desc: `Valor: ${up.value} (Status: ${up.status})`,
+                            client: lead.name,
+                            user: responsavel,
+                            category: 'CRM'
+                        });
+                    });
+                });
+                projects.forEach(proj => {
+                    const responsavel = proj.lastEditor || proj.responsible || 'Admin';
+                    proj.meetings?.forEach(m => {
+                        data.push({
+                            date: new Date(m.id),
+                            type: `Reunião (${m.type})`,
+                            desc: `${m.summary} (Agendada para: ${m.date})`,
+                            client: proj.companyName,
+                            user: responsavel,
+                            category: 'Produção'
+                        });
+                    });
+                });
+                return data.sort((a, b) => b.date - a.date);
+            }, [leads, projects, isUnlocked]);
+
+            if (!isUnlocked) {
+                return (
+                    <div className="h-full flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300">
+                        <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-2xl w-full max-w-md text-center">
+                            <div className="w-16 h-16 bg-[#bc9951]/10 text-[#bc9951] rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Icons.Lock size={32} />
+                            </div>
+                            <h2 className="text-xl font-bold text-white mb-2">Acesso Restrito</h2>
+                            <p className="text-zinc-500 text-xs mb-6">Área exclusiva para sócios e administradores.</p>
+                            
+                            <form onSubmit={handleUnlock} className="space-y-4">
+                                <input 
+                                    type="password" 
+                                    placeholder="Senha de Acesso" 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className={`w-full bg-zinc-950 border ${error ? 'border-red-500' : 'border-zinc-800'} rounded-xl px-4 py-3 text-center text-white outline-none focus:border-[#bc9951] transition-all ${error ? 'shake' : ''}`}
+                                />
+                                <button type="submit" className="w-full py-3 bg-[#bc9951] text-zinc-950 font-black rounded-xl uppercase tracking-widest text-sm hover:bg-white transition-all">
+                                    Entrar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-500">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Log de Atividades Gerais</h3>
+                            <p className="text-xs text-zinc-500">Registro automático de todas as interações do sistema.</p>
+                        </div>
+                        <div className="flex gap-2">
+                             <div className="px-3 py-1 rounded bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-black uppercase">Comercial</div>
+                             <div className="px-3 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] font-black uppercase">Produção</div>
+                             <div className="px-3 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">CRM</div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col">
+                        <div className="grid grid-cols-12 bg-zinc-950 p-4 border-b border-zinc-800 text-[9px] font-black text-zinc-500 uppercase tracking-widest">
+                            <div className="col-span-2">Data / Hora</div>
+                            <div className="col-span-2">Responsável</div>
+                            <div className="col-span-2">Cliente</div>
+                            <div className="col-span-2">Tipo</div>
+                            <div className="col-span-4">Detalhes</div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                            {reportData.length === 0 ? (
+                                <div className="p-8 text-center text-zinc-600 text-xs italic">Nenhuma atividade registrada ainda.</div>
+                            ) : (
+                                reportData.map((row, i) => (
+                                    <div key={i} className="grid grid-cols-12 items-center p-3 rounded-lg hover:bg-zinc-800/50 border border-transparent hover:border-zinc-800 transition-all group">
+                                        <div className="col-span-2 text-[10px] text-zinc-400 font-mono">{row.date.toLocaleDateString()} <span className="text-zinc-600">{row.date.toLocaleTimeString().slice(0,5)}</span></div>
+                                        <div className="col-span-2 text-[10px] font-bold text-white flex items-center gap-2">
+                                            <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] text-[#bc9951] border border-zinc-700">{row.user.slice(0,1)}</div>
+                                            {row.user}
+                                        </div>
+                                        <div className="col-span-2 text-[10px] text-zinc-300 truncate font-medium">{row.client}</div>
+                                        <div className="col-span-2">
+                                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase border ${
+                                                row.category === 'Comercial' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 
+                                                row.category === 'Produção' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 
+                                                'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                            }`}>{row.type}</span>
+                                        </div>
+                                        <div className="col-span-4 text-[10px] text-zinc-500 truncate group-hover:text-zinc-300 transition-colors" title={row.desc}>
+                                            {row.desc}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function VendasFunisView({ leads, updateLead }) {
+            const [selectedLead, setSelectedLead] = useState(null);
+            const getLeadsByStage = (stageId) => leads.filter(l => l.funnelStage === stageId);
+            return (
+                <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-500 overflow-hidden">
+                    <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+                        {SALES_STAGES.map(stage => {
+                            const count = getLeadsByStage(stage.id).length;
+                            const totalVal = getLeadsByStage(stage.id).reduce((acc, curr) => acc + parseCurrency(curr.value), 0);
+                            return (
+                                <div key={stage.id} className="min-w-[180px] bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl">
+                                    <p className="text-[9px] font-bold text-zinc-500 uppercase mb-1">{stage.label}</p>
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-xl font-bold text-white">{count}</span>
+                                        <span className="text-[9px] font-bold text-[#bc9951]">{formatCurrency(totalVal)}</span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="flex-1 flex gap-6 overflow-x-auto pb-4 custom-scrollbar">
+                        {SALES_STAGES.map(stage => (
+                            <div key={stage.id} className="w-[300px] flex-shrink-0 flex flex-col gap-4">
+                                <div className="flex items-center gap-2 px-2">
+                                   <div className={`w-2 h-2 rounded-full ${stage.color}`}></div>
+                                   <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stage.label}</h4>
+                                </div>
+                                <div className="flex-1 bg-zinc-900/20 border border-zinc-900 rounded-2xl p-2 space-y-3 overflow-y-auto">
+                                    {getLeadsByStage(stage.id).map(lead => {
+                                        const isStale = (new Date() - new Date(lead.lastActionDate)) / (1000 * 60 * 60 * 24) > 5;
+                                        return (
+                                            <div key={lead.id} onClick={() => setSelectedLead(lead)} className={`bg-zinc-800 p-4 rounded-xl border border-zinc-700 hover:border-[#bc9951] transition-all cursor-pointer group relative ${isStale && stage.id !== 'fechado' && stage.id !== 'perdido' && 'border-red-500/50 shadow-lg shadow-red-500/5'}`}>
+                                                <div className="flex justify-between items-start mb-2">
+                                                   <span className="text-[9px] font-black bg-zinc-900 text-[#bc9951] px-1.5 py-0.5 rounded border border-zinc-800 uppercase">{lead.segment}</span>
+                                                   {isStale && stage.id !== 'fechado' && stage.id !== 'perdido' && <Icons.AlertTriangle size={14} className="text-red-500" />}
+                                                </div>
+                                                <h5 className="text-sm font-bold text-white mb-1">{lead.name}</h5>
+                                                <p className="text-[10px] text-zinc-500 flex items-center gap-1 mb-3"><Icons.User size={10}/> {lead.responsible}</p>
+                                                <div className="flex items-center justify-between pt-3 border-t border-zinc-700/50">
+                                                   <span className="text-xs font-bold text-[#bc9951]">{lead.value}</span>
+                                                   <button onClick={(e) => {e.stopPropagation(); updateLead(lead.id, {funnelStage: SALES_STAGES[SALES_STAGES.findIndex(s => s.id === stage.id) + 1]?.id || stage.id})}} className="p-1 hover:text-[#bc9951] transition-colors"><Icons.ArrowRight size={14}/></button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {selectedLead && (
+                        <LeadCommercialModal lead={selectedLead} isOpen={!!selectedLead} onClose={() => setSelectedLead(null)} onUpdate={(data) => { updateLead(selectedLead.id, data); setSelectedLead({...selectedLead, ...data}); }} />
+                    )}
+                </div>
+            );
+        }
+
+        function ProductionView({ projects, updateProject, onDeleteProject, leads, updateLead }) {
+            const [activeProject, setActiveProject] = useState(null);
+            const columns = [{ key: 'brainstorm', label: 'Brainstorm', color: 'bg-zinc-500' }, { key: 'todo', label: 'A Fazer', color: 'bg-blue-500' }, { key: 'andamento', label: 'Em Andamento', color: 'bg-amber-500' }, { key: 'meeting', label: 'Reunião Agendada', color: 'bg-purple-500' }, { key: 'proposal', label: 'Proposta Comercial', color: 'bg-[#bc9951]' }, { key: 'done', label: 'Concluído', color: 'bg-emerald-500' }];
+            return (
+                <div className="h-full flex flex-col space-y-6 overflow-hidden animate-in fade-in duration-500">
+                    <div className="flex-1 overflow-x-auto pb-4 flex gap-6 custom-scrollbar">
+                        {columns.map((col) => (
+                            <div key={col.key} className="w-[320px] flex-shrink-0 flex flex-col gap-4">
+                                <div className="flex items-center gap-2 px-2">
+                                    <div className={`w-2 h-2 rounded-full ${col.color}`}></div>
+                                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{col.label}</h4>
+                                    <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-md font-bold">{projects.filter(p => p.column === col.key).length}</span>
+                                </div>
+                                <div className="flex-1 space-y-4 p-2 bg-zinc-900/30 border border-zinc-900 rounded-2xl overflow-y-auto">
+                                    {projects.filter(p => p.column === col.key).map(project => (
+                                        <div key={project.id} onClick={() => setActiveProject(project)} className="bg-zinc-800 p-4 rounded-xl border border-zinc-700 shadow-sm group hover:border-[#bc9951] transition-all cursor-pointer relative">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <p className="text-[10px] font-black text-[#bc9951] uppercase truncate max-w-[150px]">{project.segment}</p>
+                                                <button onClick={(e) => { e.stopPropagation(); onDeleteProject(project.id); }} className="text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Icons.Trash2 size={12} /></button>
+                                            </div>
+                                            <h5 className="text-sm font-bold text-white mb-2">{project.companyName}</h5>
+                                            {project.meetings?.find(m => m.status === 'agendado') && (
+                                                <div className="mb-2 px-2 py-1 bg-purple-500/10 rounded border border-purple-500/20 flex items-center gap-2">
+                                                    <Icons.Clock size={10} className="text-purple-400" />
+                                                    <span className="text-[9px] font-bold text-purple-400 uppercase">PRÓX. REUNIÃO: {project.meetings.find(m => m.status === 'agendado').date}</span>
+                                                </div>
+                                            )}
+                                            <div className="flex items-center justify-between pt-3 border-t border-zinc-700/50">
+                                                <span className="text-[10px] text-zinc-500 font-medium italic">{project.instagram}</span>
+                                                <Icons.ArrowRight size={14} className="text-zinc-700 group-hover:text-[#bc9951]" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {activeProject && (
+                        <ProjectDetailModal project={activeProject} lead={leads.find(l => l.id === activeProject.id)} isOpen={!!activeProject} onClose={() => setActiveProject(null)} onUpdate={(data) => updateProject(activeProject.id, data)} updateLead={updateLead} />
+                    )}
+                </div>
+            );
+        }
+
+        function ClientesCRMView({ leads, updateLead, projects, updateProject }) {
+            const [selectedClient, setSelectedClient] = useState(null);
+            const [activeModal, setActiveModal] = useState(null); 
+            const activeClients = leads.filter(l => l.funnelStage === 'fechado');
+            return (
+                <div className="space-y-8 animate-in fade-in duration-500">
+                    {activeClients.length === 0 ? (
+                        <Card className="p-20 flex flex-col items-center justify-center border-dashed border-2 border-zinc-800 bg-transparent text-center">
+                           <Icons.Users size={48} className="text-zinc-800 mb-4" />
+                           <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Aguardando fechamentos...</p>
+                        </Card>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {activeClients.map(client => {
+                                const hasUpsell = client.upsells?.some(u => ['planejado', 'negociacao', 'apresentado'].includes(u.status));
+                                const lastCheckpoint = client.checkpoints?.[0];
+                                const daysSinceLast = lastCheckpoint ? Math.floor((new Date() - new Date(lastCheckpoint.date)) / (1000 * 60 * 60 * 24)) : 99;
+                                const healthStatus = client.crmStatus === 'Cancelado' ? 'bg-zinc-700' : daysSinceLast < 15 ? 'bg-emerald-500' : daysSinceLast < 30 ? 'bg-amber-500' : 'bg-red-500';
+                                return (
+                                    <Card key={client.id} className={`p-6 border-l-4 transition-all group relative ${client.crmStatus === 'Cancelado' ? 'border-l-zinc-700 opacity-60 grayscale' : 'border-l-[#bc9951]'}`}>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-700 p-2"><img src={BRAVELLE_LOGO_URL} alt="Logo" className="w-full h-full object-contain" /></div>
+                                            <div className="flex gap-2">
+                                                {client.crmStatus === 'Cancelado' && <div className="bg-red-500/20 text-red-500 px-2 py-1 rounded text-[8px] font-black uppercase border border-red-500/30">CHURN</div>}
+                                                {hasUpsell && client.crmStatus !== 'Cancelado' && <div className="bg-[#bc9951]/20 text-[#bc9951] px-2 py-1 rounded text-[8px] font-black uppercase flex items-center gap-1 animate-pulse border border-[#bc9951]/30"><Icons.Zap size={8}/> Upsell</div>}
+                                                <div className={`w-3 h-3 rounded-full ${healthStatus} border-2 border-zinc-900 shadow-xl`} title={`${daysSinceLast} dias sem contato`}></div>
+                                            </div>
+                                        </div>
+                                        <h4 className="font-bold text-xl mb-1 group-hover:text-[#bc9951] transition-colors">{client.name}</h4>
+                                        <p className="text-[10px] text-zinc-500 uppercase font-bold mb-4">{client.segment}</p>
+                                        <div className="grid grid-cols-2 gap-2 mt-4">
+                                            <button onClick={() => { setSelectedClient(client); setActiveModal('checkpoint'); }} className="flex items-center justify-center gap-2 py-2 bg-zinc-800 rounded-lg text-[9px] font-bold uppercase hover:bg-white hover:text-zinc-950 transition-all border border-zinc-700 disabled:opacity-30" disabled={client.crmStatus === 'Cancelado'}><Icons.Calendar size={12}/> Checkpoint</button>
+                                            <button onClick={() => { setSelectedClient(client); setActiveModal('upsell'); }} className="flex items-center justify-center gap-2 py-2 bg-[#bc9951]/10 text-[#bc9951] rounded-lg text-[9px] font-bold uppercase hover:bg-[#bc9951] hover:text-zinc-950 transition-all border border-[#bc9951]/20 disabled:opacity-30" disabled={client.crmStatus === 'Cancelado'}><Icons.ArrowUpCircle size={12}/> Upsell</button>
+                                        </div>
+                                        <button onClick={() => { setSelectedClient(client); setActiveModal('details'); }} className="w-full mt-2 py-2 text-[9px] font-black uppercase text-zinc-600 hover:text-white transition-colors">Ver Dashboard</button>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    )}
+                    {selectedClient && activeModal === 'details' && <ClientCRMDetailsModal client={selectedClient} isOpen={true} onClose={() => setSelectedClient(null)} onUpdate={(data) => updateLead(selectedClient.id, data)} projects={projects} />}
+                    {selectedClient && activeModal === 'upsell' && <UpsellModal client={selectedClient} isOpen={true} onClose={() => setSelectedClient(null)} onUpdate={(data) => updateLead(selectedClient.id, data)} />}
+                    {selectedClient && activeModal === 'checkpoint' && <CheckpointModal client={selectedClient} isOpen={true} onClose={() => setSelectedClient(null)} onUpdate={(data) => updateLead(selectedClient.id, data)} />}
+                </div>
+            );
+        }
+
+        function TutorialView() {
+            const [activeSection, setActiveSection] = useState('intro');
+            const sections = [{ id: 'intro', label: 'Introdução', icon: Icons.Globe }, { id: 'dashboard', label: '1. Dashboard', icon: Icons.LayoutDashboard }, { id: 'sales', label: '2. Vendas', icon: Icons.Target }, { id: 'production', label: '3. Produção', icon: Icons.Trello }, { id: 'crm', label: '4. CRM', icon: Icons.Users }];
+            return (
+                <div className="h-full flex flex-col gap-8 animate-in fade-in duration-700 max-w-5xl mx-auto pb-20">
+                    <div className="text-center">
+                        <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter mb-2">🧠 Tutorial do Sistema</h1>
+                        <p className="text-[#bc9951] font-bold uppercase tracking-widest text-[10px] italic">Versão Avançada e Operacional Bravelle</p>
+                    </div>
+                    <div className="flex gap-2 border-b border-zinc-800 pb-4 overflow-x-auto custom-scrollbar">
+                        {sections.map(s => (
+                            <button key={s.id} onClick={() => setActiveSection(s.id)} className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase transition-all whitespace-nowrap border ${activeSection === s.id ? 'bg-[#bc9951] text-zinc-950 border-[#bc9951] shadow-lg' : 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-white'}`}>
+                                <s.icon size={14}/> {s.label}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                        <div className="md:col-span-8 space-y-10">
+                            {activeSection === 'intro' && (
+                                <div className="space-y-6 animate-in slide-in-from-left-4">
+                                    <h2 className="text-2xl font-bold text-white">Introdução Geral</h2>
+                                    <p className="text-zinc-400 leading-relaxed text-sm">Este sistema organiza toda a operação da Bravelle, separando claramente a visão estratégica, comercial, execução e relacionamento.</p>
+                                    <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10"><Icons.ArrowRight size={80}/></div>
+                                        <h3 className="font-black text-[#bc9951] uppercase text-[10px] mb-4 tracking-widest italic">Fluxo Lógico:</h3>
+                                        <div className="flex items-center justify-between text-center gap-2">
+                                            {['LEAD', 'VENDA', 'PRODUÇÃO', 'CRM', 'RETENÇÃO'].map((step, i) => (
+                                                <div key={step} className="flex flex-col items-center">
+                                                    <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-white font-bold text-[10px]">{i+1}</div>
+                                                    <span className="text-[9px] font-black text-zinc-500 mt-2">{step}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {activeSection === 'dashboard' && <div className="space-y-6 animate-in slide-in-from-left-4"><h2 className="text-2xl font-bold text-white">1️⃣ DASHBOARD</h2><p className="text-zinc-400">Central de visão estratégica. Use para ver a saúde da agência.</p></div>}
+                            {activeSection === 'sales' && <div className="space-y-6 animate-in slide-in-from-left-4"><h2 className="text-2xl font-bold text-white">2️⃣ VENDAS</h2><p className="text-zinc-400">Setor para transformar leads em contratos. Nada entra em produção sem passar por aqui.</p></div>}
+                            {activeSection === 'production' && <div className="space-y-6 animate-in slide-in-from-left-4"><h2 className="text-2xl font-bold text-white">3️⃣ PRODUÇÃO</h2><p className="text-zinc-400">Execução do que foi vendido. Registre todas as reuniões e briefings aqui.</p></div>}
+                            {activeSection === 'crm' && <div className="space-y-6 animate-in slide-in-from-left-4"><h2 className="text-2xl font-bold text-white">4️⃣ CRM</h2><p className="text-zinc-400">Pós-venda para manter o cliente ativo (Checkpoints e Upsells).</p></div>}
+                        </div>
+                        <div className="md:col-span-4 space-y-6">
+                            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl space-y-6">
+                                <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2 italic"><Icons.ShieldCheck size={16} className="text-[#bc9951]"/> Regras de Ouro</h3>
+                                <div className="space-y-4">
+                                    {["Registre as reuniões", "Todo lead precisa de prox. ação", "Observações claras"].map((r, i) => (
+                                        <div key={i} className="flex items-start gap-3">
+                                            <div className="w-4 h-4 rounded-full bg-[#bc9951]/20 text-[#bc9951] flex items-center justify-center text-[8px] font-black mt-0.5">{i+1}</div>
+                                            <p className="text-xs text-zinc-400 font-medium">{r}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- MODALS (Igual ao original, só usando dados via props) ---
+        function AddLeadModal({ isOpen, onClose, onSave }) {
+            const [data, setData] = useState({ name: '', segment: 'Concessionárias', origin: 'Instagram', responsible: '', value: '', instagram: '', phone: '', address: '', region: '' });
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} title="Novo Lead / Projeto">
+                    <form onSubmit={(e) => { e.preventDefault(); onSave(e, data); setData({ name: '', segment: 'Concessionárias', origin: 'Instagram', responsible: '', value: '', instagram: '', phone: '', address: '', region: '' }); }} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div><label className="text-[10px] font-bold text-zinc-500 uppercase">Empresa</label><input type="text" required value={data.name} onChange={(e) => setData({...data, name: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-[#bc9951]" placeholder="Nome" /></div>
+                            <div><label className="text-[10px] font-bold text-zinc-500 uppercase">Segmento</label><select value={data.segment} onChange={(e) => setData({...data, segment: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none">{SEGMENTOS_AUTOMOTIVOS.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div><label className="text-[10px] font-bold text-zinc-500 uppercase">Responsável</label><input type="text" required value={data.responsible} onChange={(e) => setData({...data, responsible: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-[#bc9951]" /></div>
+                            <div><label className="text-[10px] font-bold text-zinc-500 uppercase">Fee Estimado</label><input type="text" value={data.value} onChange={(e) => setData({...data, value: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-[#bc9951]" /></div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div><label className="text-[10px] font-bold text-zinc-500 uppercase">Instagram</label><input type="text" value={data.instagram} onChange={(e) => setData({...data, instagram: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-[#bc9951]" /></div>
+                            <div><label className="text-[10px] font-bold text-zinc-500 uppercase">Telefone</label><input type="text" value={data.phone} onChange={(e) => setData({...data, phone: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-[#bc9951]" /></div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                             <div><label className="text-[10px] font-bold text-zinc-500 uppercase">Região</label><input type="text" value={data.region} onChange={(e) => setData({...data, region: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-[#bc9951]" placeholder="Ex: Sul" /></div>
+                             <div><label className="text-[10px] font-bold text-zinc-500 uppercase">Endereço</label><input type="text" value={data.address} onChange={(e) => setData({...data, address: e.target.value})} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white outline-none focus:border-[#bc9951]" placeholder="Rua/Av..." /></div>
+                        </div>
+                        <button type="submit" className="w-full py-3 bg-[#bc9951] text-zinc-950 font-black rounded-xl uppercase tracking-widest text-sm transition-all hover:bg-white">Cadastrar</button>
+                    </form>
+                </Modal>
+            );
+        }
+
+        function LeadCommercialModal({ lead, isOpen, onClose, onUpdate }) {
+            const [activityNote, setActivityNote] = useState('');
+            const [activityType, setActivityType] = useState('call');
+            const addActivity = () => { if (!activityNote) return; onUpdate({ activities: [{ id: Date.now(), type: activityType, note: activityNote, date: new Date().toLocaleString() }, ...(lead.activities || [])] }); setActivityNote(''); };
+            
+            const dateAdded = lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : (lead.lastActionDate ? new Date(lead.lastActionDate).toLocaleDateString() : 'N/A');
+
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} title={`Deal: ${lead.name}`} maxWidth="max-w-4xl">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-xs">
+                        <div className="md:col-span-2 space-y-6">
+                            <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                                <h3 className="font-black text-zinc-500 uppercase mb-3 tracking-widest text-[10px]">Dados do Cliente</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                     <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-zinc-900 rounded-lg text-[#bc9951]"><Icons.Instagram size={16} /></div>
+                                        <div>
+                                            <p className="text-[9px] font-bold text-zinc-600 uppercase">Rede Social</p>
+                                            <p className="text-zinc-300 font-bold">{lead.instagram || '-'}</p>
+                                        </div>
+                                     </div>
+                                     <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-zinc-900 rounded-lg text-[#bc9951]"><Icons.Smartphone size={16} /></div>
+                                        <div>
+                                            <p className="text-[9px] font-bold text-zinc-600 uppercase">Telefone</p>
+                                            <p className="text-zinc-300 font-bold">{lead.phone || '-'}</p>
+                                        </div>
+                                     </div>
+                                     <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-zinc-900 rounded-lg text-[#bc9951]"><Icons.MapPin size={16} /></div>
+                                        <div>
+                                            <p className="text-[9px] font-bold text-zinc-600 uppercase">Localização</p>
+                                            <p className="text-zinc-300 font-bold">{lead.city} {lead.region ? `(${lead.region})` : ''}</p>
+                                            <p className="text-[9px] text-zinc-500 truncate max-w-[120px]">{lead.address}</p>
+                                        </div>
+                                     </div>
+                                     <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-zinc-900 rounded-lg text-[#bc9951]"><Icons.Calendar size={16} /></div>
+                                        <div>
+                                            <p className="text-[9px] font-bold text-zinc-600 uppercase">Adicionado em</p>
+                                            <p className="text-zinc-300 font-bold">{dateAdded}</p>
+                                        </div>
+                                     </div>
+                                </div>
+                            </div>
+
+                            <section>
+                                <h3 className="font-black text-zinc-500 uppercase mb-4 tracking-widest mt-6">Interações</h3>
+                                <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 mb-6">
+                                    <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2">Tipo de Contato</p>
+                                    <div className="flex gap-2 mb-3">
+                                        <button onClick={() => setActivityType('call')} className={`flex-1 py-1.5 text-[9px] font-black rounded border transition-all ${activityType === 'call' ? 'bg-[#bc9951] text-zinc-950 border-[#bc9951]' : 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-white'}`}>LIGAÇÃO / CALL</button>
+                                        <button onClick={() => setActivityType('message')} className={`flex-1 py-1.5 text-[9px] font-black rounded border transition-all ${activityType === 'message' ? 'bg-[#bc9951] text-zinc-950 border-[#bc9951]' : 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-white'}`}>WHATSAPP / EMAIL</button>
+                                        <button onClick={() => setActivityType('meeting')} className={`flex-1 py-1.5 text-[9px] font-black rounded border transition-all ${activityType === 'meeting' ? 'bg-[#bc9951] text-zinc-950 border-[#bc9951]' : 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-white'}`}>REUNIÃO PRESENCIAL</button>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2">Metodologia / Resumo da Conversa</p>
+                                    <textarea value={activityNote} onChange={(e) => setActivityNote(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-white outline-none h-24 mb-3" placeholder="Descreva os pontos chave, metodologia aplicada e próximos passos..." />
+                                    <button onClick={addActivity} className="w-full py-2 bg-[#bc9951] text-zinc-950 font-bold rounded text-[10px] uppercase">Salvar no Histórico</button>
+                                </div>
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">{lead.activities?.map(act => <div key={act.id} className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg"><p className="text-[#bc9951] font-bold mb-1 uppercase text-[9px]">{act.type} • {act.date}</p><p className="text-zinc-400">{act.note}</p></div>)}</div>
+                            </section>
+                        </div>
+                        <div className="space-y-6 border-l border-zinc-800 pl-8">
+                            <div className="space-y-1"><label className="text-[9px] font-black text-zinc-600 uppercase">Estágio do Funil</label><select value={lead.funnelStage} onChange={(e) => onUpdate({funnelStage: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-white text-[11px] font-bold outline-none">{SALES_STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></div>
+                            <div className="space-y-1"><label className="text-[9px] font-black text-zinc-600 uppercase">Notas Estratégicas</label><textarea value={lead.commercialNotes} onChange={(e) => onUpdate({commercialNotes: e.target.value})} className="w-full h-40 bg-zinc-950 border border-zinc-800 rounded p-3 text-zinc-400 text-[11px] outline-none" /></div>
+                            
+                            <div className="pt-4 border-t border-zinc-800">
+                                <label className="text-[9px] font-black text-[#bc9951] uppercase mb-2 block">Responsável pela Edição Atual</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Digite seu nome..." 
+                                    value={lead.lastEditor || ''} 
+                                    onChange={(e) => onUpdate({ lastEditor: e.target.value })} 
+                                    className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-white text-[10px] outline-none focus:border-[#bc9951]"
+                                />
+                                <p className="text-[8px] text-zinc-600 mt-1">Preencha para registrar quem alterou este card.</p>
+                            </div>
+                        </div>
+                    </div>
+                </Modal>
+            );
+        }
+
+        function ProjectDetailModal({ project, lead, isOpen, onClose, onUpdate, updateLead }) {
+            const [mDate, setMDate] = useState(''); const [mType, setMType] = useState('briefing'); const [mSummary, setMSummary] = useState('');
+            const addMeeting = () => { if(!mDate) return; onUpdate({ meetings: [{ id: Date.now(), date: mDate, type: mType, summary: mSummary, status: 'agendado' }, ...(project.meetings || [])] }); setMDate(''); setMSummary(''); };
+            
+            const leadData = lead || {};
+            const dateAdded = leadData.createdAt ? new Date(leadData.createdAt).toLocaleDateString() : (leadData.lastActionDate ? new Date(leadData.lastActionDate).toLocaleDateString() : 'N/A');
+
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} title={`Produção: ${project.companyName}`} maxWidth="max-w-4xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs">
+                        <section className="space-y-4">
+                            <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 mb-4">
+                                <h3 className="font-black text-zinc-500 uppercase mb-3 tracking-widest text-[10px]">Dados do Cliente</h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                                        <div className="flex items-center gap-2 text-zinc-400"><Icons.Instagram size={12}/> <span className="font-bold uppercase text-[9px]">Rede Social</span></div>
+                                        <span className="font-bold text-white">{leadData.instagram || project.instagram || '-'}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                                        <div className="flex items-center gap-2 text-zinc-400"><Icons.Smartphone size={12}/> <span className="font-bold uppercase text-[9px]">Telefone</span></div>
+                                        <span className="font-bold text-white">{leadData.phone || '-'}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                                        <div className="flex items-center gap-2 text-zinc-400"><Icons.MapPin size={12}/> <span className="font-bold uppercase text-[9px]">Localização</span></div>
+                                        <div className="text-right">
+                                            <span className="font-bold text-white block">{leadData.city} {leadData.region}</span>
+                                            <span className="text-[8px] text-zinc-500 block max-w-[150px] truncate">{leadData.address}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-zinc-400"><Icons.Calendar size={12}/> <span className="font-bold uppercase text-[9px]">Cliente Desde</span></div>
+                                        <span className="font-bold text-[#bc9951]">{dateAdded}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 className="font-black text-zinc-500 uppercase tracking-widest">Notas Técnicas</h3>
+                            <textarea value={project.notes} onChange={(e) => onUpdate({notes: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-zinc-300 outline-none h-64 border-t-4 border-t-[#bc9951]" />
+                            
+                            <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl mt-4">
+                                <label className="text-[9px] font-black text-[#bc9951] uppercase mb-2 block">Responsável pela Edição Atual</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Digite seu nome..." 
+                                    value={project.lastEditor || ''} 
+                                    onChange={(e) => onUpdate({ lastEditor: e.target.value })} 
+                                    className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-white text-[10px] outline-none focus:border-[#bc9951]"
+                                />
+                            </div>
+                        </section>
+                        <section className="space-y-6"><div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3"><h3 className="font-black text-white uppercase text-[10px] tracking-widest">Registrar Reunião</h3><div className="grid grid-cols-2 gap-2"><input type="date" value={mDate} onChange={(e) => setMDate(e.target.value)} className="bg-zinc-900 border border-zinc-800 rounded p-2 text-white" /><select value={mType} onChange={(e) => setMType(e.target.value)} className="bg-zinc-900 border border-zinc-800 rounded p-2 text-white"><option value="briefing">Briefing</option><option value="alinhamento">Alinhamento</option><option value="apresentação">Apresentação</option><option value="revisão">Revisão</option></select></div><textarea value={mSummary} onChange={(e) => setMSummary(e.target.value)} placeholder="O que foi decidido na reunião?" className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-white h-20" /><button onClick={addMeeting} className="w-full py-2 bg-[#bc9951] text-zinc-950 font-bold rounded text-[9px] uppercase">Salvar</button></div><div className="space-y-3">{project.meetings?.map(m => <div key={m.id} className="p-3 bg-zinc-900 rounded-lg border-l-2 border-l-purple-500"><p className="text-[9px] font-black text-purple-400 uppercase">{m.type} • {m.date}</p><p className="text-zinc-500 mt-1">{m.summary}</p></div>)}</div></section>
+                    </div>
+                </Modal>
+            );
+        }
+
+        function ClientCRMDetailsModal({ client, isOpen, onClose, onUpdate, projects }) {
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} title={`Pós-Venda: ${client.name}`} maxWidth="max-w-5xl">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
+                        <div className="md:col-span-1 space-y-6">
+                            <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800"><p className="text-[9px] font-black text-zinc-600 uppercase mb-3 italic tracking-widest">Saúde da Conta</p><select value={client.crmStatus} onChange={(e) => onUpdate({crmStatus: e.target.value})} className="w-full font-black py-2 px-3 rounded bg-zinc-900 border border-zinc-700 outline-none text-[10px]"><option value="Ativo">🟢 ATIVO</option><option value="Em Risco">🟡 EM RISCO</option><option value="Cancelado">🔴 CANCELADO</option></select></div>
+                            <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800"><p className="text-[9px] font-black text-zinc-600 uppercase mb-2">Ticket Médio</p><p className="text-lg font-black text-[#bc9951]">{client.value}</p></div>
+                            <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                                <p className="text-[9px] font-black text-zinc-600 uppercase mb-2">Localização</p>
+                                <p className="text-zinc-400 font-bold">{client.region || 'Sem região'}</p>
+                                <p className="text-zinc-500 mt-1">{client.address || 'Sem endereço'}</p>
+                            </div>
+                        </div>
+                        <div className="md:col-span-3 space-y-6"><h3 className="font-black text-white uppercase italic border-b border-zinc-800 pb-2 flex items-center gap-2"><Icons.History size={16}/> Timeline</h3><div className="space-y-4 pl-8 border-l border-zinc-800">{client.checkpoints?.map(cp => <div key={cp.id} className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl"><p className="text-[9px] font-black text-emerald-400 uppercase">{cp.date} <span className="text-zinc-500 mx-2">•</span> {cp.reason}</p><p className="text-zinc-400 mt-1">{cp.notes}</p></div>)}</div></div>
+                    </div>
+                </Modal>
+            );
+        }
+
+        function UpsellModal({ client, isOpen, onClose, onUpdate }) {
+            const [form, setForm] = useState({ service: '', value: '', priority: 'média' });
+            const save = () => { if (!form.service) return; onUpdate({ upsells: [{ ...form, id: Date.now(), status: 'planejado' }, ...(client.upsells || [])] }); onClose(); };
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} title={`Planejar Upsell: ${client.name}`}>
+                    <div className="space-y-4 text-xs">
+                        <input type="text" placeholder="Serviço" value={form.service} onChange={e => setForm({...form, service: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-xl text-white outline-none focus:border-[#bc9951]" />
+                        <div className="grid grid-cols-2 gap-2"><input type="text" placeholder="Valor" value={form.value} onChange={e => setForm({...form, value: e.target.value})} className="bg-zinc-950 border border-zinc-800 p-3 rounded-xl text-white outline-none" /><select value={form.priority} onChange={e => setForm({...form, priority: e.target.value})} className="bg-zinc-950 border border-zinc-800 p-3 rounded-xl text-white outline-none"><option value="média">Média</option><option value="alta">Alta</option></select></div>
+                        <button onClick={save} className="w-full py-3 bg-[#bc9951] text-zinc-950 font-black rounded-xl uppercase tracking-widest">Salvar</button>
+                    </div>
+                </Modal>
+            );
+        }
+
+        function CheckpointModal({ client, isOpen, onClose, onUpdate }) {
+            const [notes, setNotes] = useState('');
+            const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+            const [time, setTime] = useState(new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}));
+            const [reason, setReason] = useState('Reunião Semanal');
+            
+            const save = () => { 
+                const fullDate = `${new Date(date).toLocaleDateString()} às ${time}`;
+                onUpdate({ checkpoints: [{ id: Date.now(), date: fullDate, notes, reason }, ...(client.checkpoints || [])] }); 
+                onClose(); 
+            };
+            
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} title={`Registrar Checkpoint: ${client.name}`}>
+                    <div className="space-y-4 text-xs">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Data</label>
+                                <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-xl text-white outline-none" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Hora</label>
+                                <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-xl text-white outline-none" />
+                            </div>
+                        </div>
+                        <div>
+                             <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Motivo</label>
+                             <select value={reason} onChange={e => setReason(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-xl text-white outline-none">
+                                <option value="Reunião Semanal">Reunião Semanal</option>
+                                <option value="Alinhamento Mensal">Alinhamento Mensal</option>
+                                <option value="Urgência / Crise">Urgência / Crise</option>
+                                <option value="Apresentação de Resultados">Apresentação de Resultados</option>
+                                <option value="Outros">Outros</option>
+                             </select>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Resumo / Atas</label>
+                            <textarea placeholder="O que foi discutido?" value={notes} onChange={e => setNotes(e.target.value)} className="w-full h-40 bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-white outline-none" />
+                        </div>
+                        <button onClick={save} className="w-full py-4 bg-emerald-600 text-white font-black rounded-xl uppercase tracking-widest hover:bg-emerald-500 transition-colors">Registrar</button>
+                    </div>
+                </Modal>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    {% endraw %}
+    </script>
+</body>
+</html>

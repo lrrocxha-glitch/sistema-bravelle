@@ -1,0 +1,44 @@
+[
+    {
+        "id": "1769028932599",
+        "name": "Estética Automotiva Speed",
+        "segment": "Lava jato",
+        "origin": "Instagram",
+        "responsible": "Max",
+        "instagram": "@estetica.speed",
+        "phone": "61999832334",
+        "address": "QNE 30, ao lado do petshop",
+        "region": "Taguatinga Norte ",
+        "status": "Novo Lead",
+        "funnelStage": "fechado",
+        "value": "R$ 1.200,00",
+        "city": "Cadastrado Manual",
+        "activities": [
+            {
+                "id": 1769028947759,
+                "type": "call",
+                "note": "dsds",
+                "date": "21/01/2026, 17:55:47"
+            },
+            {
+                "id": 1769028945752,
+                "type": "message",
+                "note": "dd",
+                "date": "21/01/2026, 17:55:45"
+            },
+            {
+                "id": 1769028944267,
+                "type": "meeting",
+                "note": "asasd",
+                "date": "21/01/2026, 17:55:44"
+            }
+        ],
+        "commercialNotes": "",
+        "lastActionDate": "2026-01-21T17:55:49.369434",
+        "createdAt": "2026-01-21T20:55:32.599Z",
+        "crmStatus": "Ativo",
+        "upsells": [],
+        "checkpoints": [],
+        "lastEditor": "rocha"
+    }
+]
